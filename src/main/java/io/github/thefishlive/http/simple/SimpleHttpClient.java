@@ -8,6 +8,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import io.github.thefishlive.http.HttpMethod;
 import io.github.thefishlive.http.HttpStatusCode;
@@ -45,8 +47,16 @@ public class SimpleHttpClient implements HttpClient {
 	        response.append('\n');
 	    }
 	    reader.close();
+	    
+	    List<HttpHeader> headers = new ArrayList<HttpHeader>();
+	    
+	    for (Map.Entry<String, List<String>> entry : connection.getHeaderFields().entrySet()) {
+	    	for (String value : entry.getValue()) {
+	    		headers.add(new SimpleHttpHeader(entry.getKey(), value));
+	    	}
+	    }
 		
-		return new SimpleHttpResponse(request.getMethod(), response.toString(), new ArrayList<HttpHeader>(), HttpStatusCode.fromCode(connection.getResponseCode()));
+		return new SimpleHttpResponse(response.toString(), headers, HttpStatusCode.fromCode(connection.getResponseCode()));
 	}
 
 	public HttpRequest createRequest(URI target) {
