@@ -11,8 +11,6 @@ public interface HttpClient {
 	
 	public HttpRequest createRequest(URI target, HttpMethod method);
 	
-	public HttpRequest createRequest(URI target, HttpMethod method, String content);
-	
 	public HttpResponse sendRequest(HttpRequest request) throws java.io.IOException;
 	
 }

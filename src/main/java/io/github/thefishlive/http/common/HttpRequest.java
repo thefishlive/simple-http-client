@@ -1,5 +1,6 @@
 package io.github.thefishlive.http.common;
 
+import java.io.OutputStream;
 import java.util.List;
 
 import io.github.thefishlive.http.HttpMethod;
@@ -15,9 +16,7 @@ public interface HttpRequest {
 	
 	public void setTarget(URI uri);
 	
-	public String getContent();
-	
-	public void setContent(String content);
+	public OutputStream getContent();
 	
 	public List<HttpHeader> getHeaders();
 	

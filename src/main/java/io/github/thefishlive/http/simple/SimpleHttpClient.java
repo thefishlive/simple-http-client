@@ -1,11 +1,14 @@
 package io.github.thefishlive.http.simple;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +24,7 @@ import io.github.thefishlive.http.common.HttpResponse;
 
 public class SimpleHttpClient implements HttpClient {
 
+	@Override
 	public HttpResponse sendRequest(HttpRequest request) throws IOException {
 		HttpURLConnection connection = request.getTarget().openConnection();
 		connection.setRequestMethod(request.getMethod().name());
@@ -33,21 +37,11 @@ public class SimpleHttpClient implements HttpClient {
 		
 		if (request.getMethod().doOutput()) {
 			OutputStream output = connection.getOutputStream();
-			output.write(request.getContent().getBytes(Charset.forName("UTF-8")));
+			// TODO copy content to output buffer
 			output.flush();
 			output.close();
 		}
 		
-		InputStream input = connection.getInputStream();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-	    String line;
-	    StringBuffer response = new StringBuffer(); 
-	    while((line = reader.readLine()) != null) {
-	        response.append(line);
-	        response.append('\n');
-	    }
-	    reader.close();
-	    
 	    List<HttpHeader> headers = new ArrayList<HttpHeader>();
 	    
 	    for (Map.Entry<String, List<String>> entry : connection.getHeaderFields().entrySet()) {
@@ -56,21 +50,17 @@ public class SimpleHttpClient implements HttpClient {
 	    	}
 	    }
 		
-		return new SimpleHttpResponse(response.toString(), headers, HttpStatusCode.fromCode(connection.getResponseCode()));
+		return new SimpleHttpResponse(connection.getInputStream(), headers, HttpStatusCode.fromCode(connection.getResponseCode()));
 	}
 
+	@Override
 	public HttpRequest createRequest(URI target) {
 		return createRequest(target, HttpMethod.GET);
 	}
 
+	@Override
 	public HttpRequest createRequest(URI target, HttpMethod method) {
 		return new SimpleHttpRequest(method, target);
-	}
-
-	public HttpRequest createRequest(URI target, HttpMethod method, String content) {
-		HttpRequest request = createRequest(target, method); 
-		request.setContent(content);
-		return request;
 	}
 
 }
